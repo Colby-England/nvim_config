@@ -90,6 +90,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.opt.makeprg = 'compiledb make'
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
@@ -247,7 +248,12 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  {
+    'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+    opts = {
+      auto_cmd = true,
+    },
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -610,6 +616,15 @@ require('lazy').setup({
               callback = function(event2)
                 vim.lsp.buf.clear_references()
                 vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+              end,
+            })
+          end
+
+          if client and client_supports_method(client, 'textDocument/formatting', event.buf) then
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              buffer = event.buf,
+              callback = function()
+                vim.lsp.buf.format { bufnr = event.buf }
               end,
             })
           end
